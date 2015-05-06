@@ -1,5 +1,13 @@
 package kr.ac.yonsei.lis.project.melon;
 
+import com.google.common.base.Optional;
+import com.optimaize.langdetect.LanguageDetector;
+import com.optimaize.langdetect.LanguageDetectorBuilder;
+import com.optimaize.langdetect.i18n.LdLocale;
+import com.optimaize.langdetect.ngram.NgramExtractors;
+import com.optimaize.langdetect.text.CommonTextObjectFactories;
+import com.optimaize.langdetect.text.TextObject;
+import com.optimaize.langdetect.text.TextObjectFactory;
 import kr.ac.yonsei.lis.project.Constants;
 import kr.ac.yonsei.lis.project.model.Song;
 import org.jsoup.Jsoup;
@@ -17,6 +25,15 @@ import java.util.regex.Matcher;
 
 public class MelonInfoExtractor {
   private static final Logger LOG = LoggerFactory.getLogger(MelonInfoExtractor.class);
+
+  private LanguageDetector langDetector;
+  private TextObjectFactory textObjectFactory;
+
+  public MelonInfoExtractor() {
+    langDetector = LanguageDetectorBuilder.create(NgramExtractors.standard())
+        .withProfiles(Constants.LANG_PROFILES).build();
+    textObjectFactory = CommonTextObjectFactories.forDetectingOnLargeText();
+  }
 
   public Song extractSongFromHTML(File file) {
     Document document;
@@ -37,6 +54,12 @@ public class MelonInfoExtractor {
     String lyrics = lyricsElem.text();
     if (lyrics == null || "".equals(lyrics)) {
       LOG.info("Lyrics doesn't exists. (id: " + id + ")");
+      return null;
+    }
+    TextObject lyricsObj = textObjectFactory.forText(lyrics);
+    LdLocale language = langDetector.detect(lyricsObj).orNull();
+    if (language == null || !"ko".equalsIgnoreCase(language.getLanguage())) {
+      LOG.info("Language is not Korean. (id: " + id + ")");
       return null;
     }
 

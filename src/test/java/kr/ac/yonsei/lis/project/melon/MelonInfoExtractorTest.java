@@ -1,6 +1,5 @@
 package kr.ac.yonsei.lis.project.melon;
 
-import kr.ac.yonsei.lis.project.Constants;
 import kr.ac.yonsei.lis.project.model.Song;
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,7 +45,6 @@ public class MelonInfoExtractorTest {
 
   @Test
   public void testExtractSongFromHTMLWithoutLyrics() {
-    int songId = 956055;
     URL path = this.getClass().getResource("/956055.html");
     File file = new File(path.getFile());
 
