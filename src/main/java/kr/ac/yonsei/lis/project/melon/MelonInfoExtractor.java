@@ -11,14 +11,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 
 public class MelonInfoExtractor {
-  private static final Calendar CALENDAR = Calendar.getInstance();
   private static final Logger LOG = LoggerFactory.getLogger(MelonInfoExtractor.class);
 
   public Song extractSongFromHTML(File file) {
@@ -45,15 +42,20 @@ public class MelonInfoExtractor {
 
     // extract release date
     Elements dateElem = document.select("dl.song_info > dd:nth-child(6)");
-    Matcher matcher = Constants.DATE_PATTERN.matcher(dateElem.text());
+    String dateText = dateElem.text();
+    String date;
+    Matcher matcher = Constants.DATE_MONTH_PATTERN.matcher(dateText);
     if (!matcher.find()) {
-      LOG.info("Date format is invalid. (id: " + id + ")");
-      return null;
+      matcher = Constants.DATE_YEAR_PATTERN.matcher(dateText);
+      if (!matcher.find()) {
+        LOG.info("Date format is invalid. (id: " + id + ")");
+        return null;
+      }
+
+      date = matcher.group("year");
+    } else {
+      date = matcher.group("year") + matcher.group("month");
     }
-    int year = Integer.valueOf(matcher.group("year"));
-    int month = Integer.valueOf(matcher.group("month")) - 1;
-    CALENDAR.set(year, month, 1, 0, 0, 0);
-    Date date = CALENDAR.getTime();
 
     // extract title
     Elements titleElem = document.select("p.songname");
@@ -64,6 +66,9 @@ public class MelonInfoExtractor {
     Elements artistElem = document.select("dl.song_info a.atistname");
     for (Element element : artistElem) {
       artists.add(element.attr("title"));
+    }
+    if (artists.size() == 0) {
+      artists.add("NO ARTIST");
     }
 
     // extract album
@@ -79,6 +84,9 @@ public class MelonInfoExtractor {
     Elements lyricistsElem = document.select("div.box_lyric > a");
     for (Element element : lyricistsElem) {
       lyricists.add(element.attr("title"));
+    }
+    if (lyricists.size() == 0) {
+      lyricists.add("NO LYRICISTS");
     }
 
     return new Song(id, artists, lyricists, title, album, lyrics, date, genre);

@@ -70,7 +70,7 @@ public class Runner {
     }
 
     BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath));
-    Gson gson = new GsonBuilder().setDateFormat(Constants.DATE_FORMAT.toPattern()).create();
+    Gson gson = new GsonBuilder().create();
 
     for (String path : inputPath.list()) {
       if (!path.endsWith(".html")) {
@@ -84,6 +84,7 @@ public class Runner {
 
       String jsonified = gson.toJson(song);
       writer.write(jsonified);
+      writer.newLine();
     }
 
     writer.close();

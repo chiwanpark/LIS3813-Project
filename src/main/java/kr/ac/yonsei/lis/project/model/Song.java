@@ -1,8 +1,5 @@
 package kr.ac.yonsei.lis.project.model;
 
-import kr.ac.yonsei.lis.project.Constants;
-
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -14,14 +11,14 @@ public class Song {
   public String title;
   public String album;
   public String lyrics;
-  public Date date;
+  public String date;
   public String genre;
 
   public Song() {
   }
 
-  public Song(int id, Set<String> artists, Set<String> lyricists, String title, String album, String lyrics, Date date,
-              String genre) {
+  public Song(int id, Set<String> artists, Set<String> lyricists, String title, String album, String lyrics,
+              String date, String genre) {
     this.id = id;
     this.artists = new HashSet<String>(artists);
     this.lyricists = new HashSet<String>(lyricists);
@@ -45,7 +42,7 @@ public class Song {
       }
     }
     builder.append("), title=").append(title).append(", album=").append(album).append(", genre=").append(genre)
-        .append(", date=").append(Constants.DATE_FORMAT).append(", lyricists=(");
+        .append(", date=").append(date).append(", lyricists=(");
     iterator = lyricists.iterator();
     while (iterator.hasNext()) {
       builder.append(iterator.next());
