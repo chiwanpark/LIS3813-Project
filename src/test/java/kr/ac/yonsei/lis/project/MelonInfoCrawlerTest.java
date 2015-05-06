@@ -31,33 +31,4 @@ public class MelonInfoCrawlerTest {
 
     assertTrue("Result with valid song id (3843474) must contain string '윤하'", result.contains("윤하"));
   }
-
-  @Test
-  public void testExtractSongFromHTML() {
-    int songId = 3843474;
-    String result = crawler.downloadInfoPage(songId);
-    Song song = crawler.extractSongFromHTML(result);
-
-    assertEquals(1, song.artists.size());
-    assertTrue(song.artists.contains("윤하"));
-
-    assertEquals(3, song.lyricists.size());
-    assertTrue(song.lyricists.contains("윤하"));
-    assertTrue(song.lyricists.contains("스코어"));
-    assertTrue(song.lyricists.contains("김병석"));
-
-    assertEquals("Supersonic", song.album);
-    assertEquals("201207", Constants.DATE_FORMAT.format(song.date));
-    assertEquals("rock", song.genre);
-    assertEquals(songId, song.id);
-  }
-
-  @Test
-  public void testExtractSongFromHTMLWithoutLyrics() {
-    int songId = 956055;
-    String result = crawler.downloadInfoPage(songId);
-    Song song = crawler.extractSongFromHTML(result);
-
-    assertNull("Result with song that doesn't have lyrics must be null.", song);
-  }
 }

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.util.Arrays;
 
@@ -20,6 +21,8 @@ public class Runner {
 
     if ("crawler".equals(args[0])) {
       runCrawler(Arrays.copyOfRange(args, 1, args.length));
+    } else if ("extractor".equals(args[0])) {
+      runExtractor(Arrays.copyOfRange(args, 1, args.length));
     }
   }
 
@@ -32,24 +35,54 @@ public class Runner {
     int startId = Integer.valueOf(args[0]);
     int endId = Integer.valueOf(args[1]);
     MelonInfoCrawler crawler = new MelonInfoCrawler();
-    Gson gson = new GsonBuilder().setDateFormat(Constants.DATE_FORMAT.toPattern()).create();
-    BufferedWriter writer = new BufferedWriter(new FileWriter(args[2]));
     for (int i = startId; i <= endId; ++i) {
       String html = crawler.downloadInfoPage(i);
       if (html == null || "".equals(html)) {
         continue;
       }
-      Song song = crawler.extractSongFromHTML(html);
+
+      BufferedWriter writer = new BufferedWriter(new FileWriter(args[2] + File.separator + i + ".html"));
+      writer.write(html);
+      writer.close();
+    }
+  }
+
+  public static void runExtractor(String... args) throws Exception {
+    if (args.length != 2) {
+      LOG.error("Extractor needs input path, output path parameters!");
+      return;
+    }
+
+    MelonInfoExtractor extractor = new MelonInfoExtractor();
+    File inputPath = new File(args[0]);
+    if (!inputPath.isDirectory() || !inputPath.canRead()) {
+      LOG.error("Input path is invalid!");
+      return;
+    }
+
+    File outputPath = new File(args[1]);
+    if (outputPath.exists()) {
+      LOG.error("Output path is invalid!");
+      return;
+    }
+
+    BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath));
+    Gson gson = new GsonBuilder().setDateFormat(Constants.DATE_FORMAT.toPattern()).create();
+
+    for (String path : inputPath.list()) {
+      if (!path.endsWith(".html")) {
+         continue;
+      }
+
+      Song song = extractor.extractSongFromHTML(new File(inputPath.getAbsolutePath() + File.separator + path));
       if (song == null) {
         continue;
       }
 
-      writer.write(gson.toJson(song));
-      writer.newLine();
-      if (i % 1000 == 0) {
-        writer.flush();
-      }
+      String jsonified = gson.toJson(song);
+      writer.write(jsonified);
     }
+
     writer.close();
   }
 }
