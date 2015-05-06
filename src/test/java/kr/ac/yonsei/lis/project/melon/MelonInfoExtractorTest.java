@@ -1,5 +1,8 @@
-package kr.ac.yonsei.lis.project;
+package kr.ac.yonsei.lis.project.melon;
 
+import kr.ac.yonsei.lis.project.Constants;
+import kr.ac.yonsei.lis.project.model.Song;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,7 +39,7 @@ public class MelonInfoExtractorTest {
     assertTrue(song.lyricists.contains("김병석"));
 
     assertEquals("Supersonic", song.album);
-    assertEquals("201207", Constants.DATE_FORMAT.format(song.date));
+    Assert.assertEquals("201207", Constants.DATE_FORMAT.format(song.date));
     assertEquals("rock", song.genre);
     assertEquals(songId, song.id);
   }

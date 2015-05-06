@@ -1,4 +1,4 @@
-package kr.ac.yonsei.lis.project;
+package kr.ac.yonsei.lis.project.melon;
 
 import org.junit.Before;
 import org.junit.Test;

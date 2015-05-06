@@ -1,4 +1,6 @@
-package kr.ac.yonsei.lis.project;
+package kr.ac.yonsei.lis.project.model;
+
+import kr.ac.yonsei.lis.project.Constants;
 
 import java.util.Date;
 import java.util.HashSet;

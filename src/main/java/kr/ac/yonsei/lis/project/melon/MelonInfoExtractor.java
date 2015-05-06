@@ -1,5 +1,7 @@
-package kr.ac.yonsei.lis.project;
+package kr.ac.yonsei.lis.project.melon;
 
+import kr.ac.yonsei.lis.project.Constants;
+import kr.ac.yonsei.lis.project.model.Song;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;

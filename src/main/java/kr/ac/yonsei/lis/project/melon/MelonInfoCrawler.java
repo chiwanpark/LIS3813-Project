@@ -1,5 +1,6 @@
-package kr.ac.yonsei.lis.project;
+package kr.ac.yonsei.lis.project.melon;
 
+import kr.ac.yonsei.lis.project.Constants;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
