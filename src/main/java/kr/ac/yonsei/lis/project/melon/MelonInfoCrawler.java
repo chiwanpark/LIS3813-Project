@@ -19,8 +19,15 @@ public class MelonInfoCrawler {
   private CloseableHttpClient httpClient;
 
   public MelonInfoCrawler() {
-    RequestConfig globalConfig = RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build();
-    httpClient = HttpClients.custom().setDefaultRequestConfig(globalConfig).build();
+    RequestConfig globalConfig = RequestConfig.custom()
+        .setCookieSpec(CookieSpecs.STANDARD)
+        .setConnectionRequestTimeout(5000)
+        .build();
+    httpClient = HttpClients.custom()
+        .setDefaultRequestConfig(globalConfig)
+        .setUserAgent("Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 " +
+            "Safari/537.36")
+        .build();
   }
 
   public String downloadInfoPage(int id) {
