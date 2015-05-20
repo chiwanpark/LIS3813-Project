@@ -74,10 +74,16 @@ public class Runner {
 
     for (String path : inputPath.list()) {
       if (!path.endsWith(".html")) {
-         continue;
+        continue;
       }
 
-      Song song = extractor.extractSongFromHTML(new File(inputPath.getAbsolutePath() + File.separator + path));
+      Song song = null;
+      try {
+        song = extractor.extractSongFromHTML(new File(inputPath.getAbsolutePath() + File.separator + path));
+      } catch (Exception e) {
+        LOG.error("Exception caught!", e);
+      }
+
       if (song == null) {
         continue;
       }
