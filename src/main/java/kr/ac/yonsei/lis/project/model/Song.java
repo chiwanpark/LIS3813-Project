@@ -8,6 +8,7 @@ public class Song {
   public int id;
   public Set<String> artists;
   public Set<String> lyricists;
+  public Set<String> composers;
   public String title;
   public String album;
   public String lyrics;
@@ -17,11 +18,12 @@ public class Song {
   public Song() {
   }
 
-  public Song(int id, Set<String> artists, Set<String> lyricists, String title, String album, String lyrics,
-              String date, String genre) {
+  public Song(int id, Set<String> artists, Set<String> lyricists, Set<String> composers, String title, String album,
+              String lyrics, String date, String genre) {
     this.id = id;
     this.artists = new HashSet<String>(artists);
     this.lyricists = new HashSet<String>(lyricists);
+    this.composers = new HashSet<String>(composers);
     this.title = title;
     this.album = album;
     this.lyrics = lyrics;
@@ -50,6 +52,17 @@ public class Song {
         builder.append(", ");
       }
     }
+    builder.append("), composers=(");
+
+    iterator = composers.iterator();
+    while (iterator.hasNext()) {
+      builder.append(iterator.next());
+      if (iterator.hasNext()) {
+        builder.append(", ");
+      }
+    }
+
+    builder.append(")}");
 
     return builder.toString();
   }

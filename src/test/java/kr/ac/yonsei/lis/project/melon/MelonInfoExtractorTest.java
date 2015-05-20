@@ -37,6 +37,9 @@ public class MelonInfoExtractorTest {
     assertTrue(song.lyricists.contains("스코어"));
     assertTrue(song.lyricists.contains("김병석"));
 
+    assertEquals(1, song.composers.size());
+    assertTrue(song.composers.contains("스코어"));
+
     assertEquals("Supersonic", song.album);
     Assert.assertEquals("201207", song.date);
     assertEquals("rock", song.genre);

@@ -1,6 +1,5 @@
 package kr.ac.yonsei.lis.project.melon;
 
-import com.google.common.base.Optional;
 import com.optimaize.langdetect.LanguageDetector;
 import com.optimaize.langdetect.LanguageDetectorBuilder;
 import com.optimaize.langdetect.i18n.LdLocale;
@@ -102,16 +101,27 @@ public class MelonInfoExtractor {
     Elements genreElem = document.select("dl.song_info > dd:nth-child(8)");
     String genre = genreElem.text().toLowerCase();
 
-    // extract lyricists
+    // extract lyricists and composers
     Set<String> lyricists = new HashSet<String>();
-    Elements lyricistsElem = document.select("div.box_lyric > a");
-    for (Element element : lyricistsElem) {
-      lyricists.add(element.attr("title"));
+    Set<String> composers = new HashSet<String>();
+    Elements lyricComposeElem = document.select("div.box_lyric");
+    for (Element element : lyricComposeElem) {
+      Element typeElem = element.select("dl > dt").first();
+      Element aElem = element.select("a.thumb").first();
+      if ("작사".equals(typeElem.text())) {
+        lyricists.add(aElem.attr("title"));
+      } else if ("작곡".equals(typeElem.text())) {
+        composers.add(aElem.attr("title"));
+      }
     }
+
     if (lyricists.size() == 0) {
       lyricists.add("NO LYRICISTS");
     }
+    if (composers.size() == 0) {
+      composers.add("NO COMPOSERS");
+    }
 
-    return new Song(id, artists, lyricists, title, album, lyrics, date, genre);
+    return new Song(id, artists, lyricists, composers, title, album, lyrics, date, genre);
   }
 }
