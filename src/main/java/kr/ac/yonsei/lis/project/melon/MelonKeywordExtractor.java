@@ -19,6 +19,7 @@ public class MelonKeywordExtractor {
     komoran = new Komoran(komoranResources.getFile());
   }
 
+  @SuppressWarnings("unchecked")
   public List<String> extractKeyword(String lyrics) {
     List<String> result = new ArrayList<String>();
 
@@ -26,9 +27,10 @@ public class MelonKeywordExtractor {
     for (List<Pair<String, String>> eojeol : komoranResult) {
       for (Pair<String, String> wordMorph : eojeol) {
         final String tag = wordMorph.getSecond();
-        if ("NNG".equals(tag) || "NNP".equals(tag) || "NP".equals(tag) ||
-            "VV".equals(tag) || "VA".equals(tag)) {
+        if ("NNG".equals(tag) || "NNP".equals(tag) || "NP".equals(tag)) {
           result.add(wordMorph.getFirst());
+        } else if ("VV".equals(tag) || "VA".equals(tag)) {
+          result.add(wordMorph.getFirst() + "다");
         }
       }
     }

@@ -2,15 +2,16 @@ package kr.ac.yonsei.lis.project;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import kr.ac.yonsei.lis.project.analysis.TopicModelingAnalysis;
 import kr.ac.yonsei.lis.project.melon.MelonInfoCrawler;
 import kr.ac.yonsei.lis.project.melon.MelonInfoExtractor;
-import kr.ac.yonsei.lis.project.melon.MelonKeywordExtractor;
 import kr.ac.yonsei.lis.project.model.Song;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Runner {
@@ -56,8 +57,8 @@ public class Runner {
       runCrawler(Arrays.copyOfRange(args, 1, args.length));
     } else if ("extractor".equals(args[0])) {
       runExtractor(Arrays.copyOfRange(args, 1, args.length));
-    } else if ("keyword-extractor".equals(args[0])) {
-      runKeywordExtractor(Arrays.copyOfRange(args, 1, args.length));
+    } else if ("topicModeling".equals(args[0])) {
+      runTopicModelingAnalysis(Arrays.copyOfRange(args, 1, args.length));
     }
   }
 
@@ -121,68 +122,32 @@ public class Runner {
     writer.close();
   }
 
-  public static void runKeywordExtractor(String... args) throws Exception {
-    if (args.length != 2) {
-      LOG.error("NounExtractor needs input path, output path parameters");
+  public static void runTopicModelingAnalysis(String... args) throws Exception {
+    if (args.length != 6) {
+      LOG.error("Topic modeling needs input path, output path, number of topic, number of top words, number " +
+          "of iteration, and number of thread parameters");
       return;
     }
 
-    if (!validInputFile(args[0]) || !validOutput(args[1])) {
+    if (!validInputFile(args[0]) || !validInputDirectory(args[1])) {
       return;
     }
 
-    int count = 0;
-    MelonKeywordExtractor extractor = new MelonKeywordExtractor();
+    int numTopics = Integer.valueOf(args[2]);
+    int numWords = Integer.valueOf(args[3]);
+    int numIterations = Integer.valueOf(args[4]);
+    int numThreads = Integer.valueOf(args[5]);
+
+    List<Song> songs = new LinkedList<Song>();
     Gson gson = new GsonBuilder().create();
-
+    TopicModelingAnalysis analysis = new TopicModelingAnalysis();
     BufferedReader reader = new BufferedReader(new FileReader(new File(args[0])));
-    BufferedWriter writer = new BufferedWriter(new FileWriter(new File(args[1])));
 
-    while(reader.ready()) {
+    while (reader.ready()) {
       Song song = gson.fromJson(reader.readLine(), Song.class);
-      List<String> nouns = extractor.extractKeyword(song.lyrics);
-      StringBuilder builder = new StringBuilder();
-
-      // song id
-      builder.append(song.id).append('\t');
-
-      // artists
-      for (String artist : song.artists) {
-        builder.append(artist).append(',');
-      }
-      builder.deleteCharAt(builder.length() - 1);
-      builder.append('\t');
-
-      // release date
-      builder.append(song.date);
-      if (song.date.length() == 4) {
-        builder.append("00");
-      }
-      builder.append('\t');
-
-      // lyricists
-      for (String lyricist : song.lyricists) {
-        builder.append(lyricist).append(',');
-      }
-      builder.deleteCharAt(builder.length() - 1);
-      builder.append('\t');
-
-      // nouns
-      for (String noun : nouns) {
-        builder.append(noun).append('|');
-      }
-      builder.deleteCharAt(builder.length() - 1);
-
-      builder.append('\n');
-      writer.write(builder.toString());
-
-      ++count;
-      if (count % 5000 == 0) {
-        LOG.info("Noun Extraction Processing (" + count + ")");
-      }
+      songs.add(song);
     }
 
-    reader.close();
-    writer.close();
+    analysis.runAnalysis(songs, args[1], numTopics, numIterations, numThreads, numWords);
   }
 }
