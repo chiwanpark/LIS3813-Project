@@ -6,10 +6,12 @@ import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import kr.ac.yonsei.lis.project.melon.MelonKeywordExtractor;
 import kr.ac.yonsei.lis.project.model.Song;
+import kr.ac.yonsei.lis.project.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -17,13 +19,26 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class TopicModelingAnalysis {
+  private String stopWordsPath;
+
+  public TopicModelingAnalysis() {
+    // copy resources
+    List<String> resources = new ArrayList<String>();
+    resources.add("/stopwords.txt");
+
+    try {
+      stopWordsPath = FileUtils.copyResources(resources) + File.separator + "stopwords.txt";
+    } catch (IOException e) {
+      throw new RuntimeException("Cannot load stop word list");
+    }
+  }
+
   public void runAnalysis(Iterable<Song> songList, String outputDir, int numTopics, int numIterations, int numThreads,
                           int numWords) throws Exception {
     List<Pipe> pipes = new ArrayList<Pipe>();
 
     pipes.add(new CharSequence2TokenSequence(Pattern.compile("\\p{L}+|")));
-    final File stopWordFile = new File(TopicModelingAnalysis.class.getResource("/stopwords.txt").getFile());
-    pipes.add(new TokenSequenceRemoveStopwords(stopWordFile, "utf-8", false, false, false));
+    pipes.add(new TokenSequenceRemoveStopwords(new File(stopWordsPath), "utf-8", false, false, false));
     pipes.add(new TokenSequence2FeatureSequence());
 
     InstanceList instances = new InstanceList(new SerialPipes(pipes));

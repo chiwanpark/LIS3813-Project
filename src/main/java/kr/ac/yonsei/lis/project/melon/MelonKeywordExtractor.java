@@ -1,9 +1,10 @@
 package kr.ac.yonsei.lis.project.melon;
 
+import kr.ac.yonsei.lis.project.util.FileUtils;
 import kr.co.shineware.nlp.komoran.core.analyzer.Komoran;
 import kr.co.shineware.util.common.model.Pair;
 
-import java.net.URL;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,12 +12,19 @@ public class MelonKeywordExtractor {
   private Komoran komoran;
 
   public MelonKeywordExtractor() {
-    final URL komoranResources = MelonKeywordExtractor.class.getResource("/komoran-models");
-    if (komoranResources == null) {
+    // copy komoran model files to temp directory
+    List<String> resources = new ArrayList<String>();
+    resources.add("/komoran-models/irregular.model");
+    resources.add("/komoran-models/observation.model");
+    resources.add("/komoran-models/pos.table");
+    resources.add("/komoran-models/transition.model");
+
+    try {
+      String destPath = FileUtils.copyResources(resources);
+      komoran = new Komoran(destPath);
+    } catch (IOException e) {
       throw new RuntimeException("Cannot load komoran model file");
     }
-
-    komoran = new Komoran(komoranResources.getFile());
   }
 
   @SuppressWarnings("unchecked")
