@@ -46,12 +46,45 @@
     </dependency>
 
     <dependency>
+      <groupId>cc.mallet</groupId>
+      <artifactId>mallet</artifactId>
+      <version>2.0.7</version>
+    </dependency>
+
+    <dependency>
+      <groupId>kr.co.shineware.ds</groupId>
+      <artifactId>shineware-ds</artifactId>
+      <version>1.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>kr.co.shineware.util</groupId>
+      <artifactId>shineware-common</artifactId>
+      <version>2.0</version>
+    </dependency>
+
+
+    <dependency>
+      <groupId>kr.co.shineware.nlp</groupId>
+      <artifactId>komoran</artifactId>
+      <version>2.4-e</version>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.12</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
+
+  <repositories>
+    <repository>
+      <id>in-project</id>
+      <name>In Project Repo</name>
+      <url>file://${project.basedir}/libs</url>
+    </repository>
+  </repositories>
 
   <build>
     <plugins>
