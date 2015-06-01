@@ -6,6 +6,7 @@ import kr.ac.yonsei.lis.project.analysis.TopicModelingAnalysis;
 import kr.ac.yonsei.lis.project.melon.MelonInfoCrawler;
 import kr.ac.yonsei.lis.project.melon.MelonInfoExtractor;
 import kr.ac.yonsei.lis.project.model.Song;
+import kr.ac.yonsei.lis.project.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,36 +17,6 @@ import java.util.List;
 
 public class Runner {
   private static final Logger LOG = LoggerFactory.getLogger(Runner.class);
-
-  public static boolean validInputDirectory(String input) {
-    File inputPath = new File(input);
-    if (!inputPath.isDirectory() || !inputPath.canRead()) {
-      LOG.error("Input path is invalid!");
-      return false;
-    }
-
-    return true;
-  }
-
-  public static boolean validInputFile(String input) {
-    File inputPath = new File(input);
-    if (!inputPath.canRead()) {
-      LOG.error("Input path is invalid!");
-      return false;
-    }
-
-    return true;
-  }
-
-  public static boolean validOutput(String output) {
-    File outputPath = new File(output);
-    if (outputPath.exists()) {
-      LOG.error("Output path is invalid!");
-      return false;
-    }
-
-    return true;
-  }
 
   public static void main(String... args) throws Exception {
     if (args.length == 0) {
@@ -89,7 +60,7 @@ public class Runner {
       return;
     }
 
-    if (!validInputDirectory(args[0]) || !validOutput(args[1])) {
+    if (!FileUtils.validInputDirectory(args[0]) || !FileUtils.validOutput(args[1])) {
       return;
     }
 
@@ -129,7 +100,7 @@ public class Runner {
       return;
     }
 
-    if (!validInputFile(args[0]) || !validInputDirectory(args[1])) {
+    if (!FileUtils.validInputFile(args[0]) || !FileUtils.validInputDirectory(args[1])) {
       return;
     }
 
@@ -139,15 +110,8 @@ public class Runner {
     int numThreads = Integer.valueOf(args[5]);
     int date = Integer.valueOf(args[6]);
 
-    List<Song> songs = new LinkedList<Song>();
-    Gson gson = new GsonBuilder().create();
     TopicModelingAnalysis analysis = new TopicModelingAnalysis();
-    BufferedReader reader = new BufferedReader(new FileReader(new File(args[0])));
-
-    while (reader.ready()) {
-      Song song = gson.fromJson(reader.readLine(), Song.class);
-      songs.add(song);
-    }
+    Iterable<Song> songs = FileUtils.loadSong(args[0]);
 
     analysis.runAnalysis(songs, args[1], numTopics, numIterations, numThreads, numWords, date);
   }
