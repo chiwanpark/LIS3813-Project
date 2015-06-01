@@ -33,6 +33,8 @@ public class Runner {
       runTopicModelingAnalysis(Arrays.copyOfRange(args, 1, args.length));
     } else if ("statisticsByKey".equals(args[0])) {
       runStatisticsByKey(Arrays.copyOfRange(args, 1, args.length));
+    } else if ("statisticsByTopic".equals(args[0])) {
+      runStatisticsByTopic(Arrays.copyOfRange(args, 1, args.length));
     }
   }
 
@@ -153,17 +155,105 @@ public class Runner {
       List<Map.Entry<Integer, Integer>> topicListByKey =
           new ArrayList<Map.Entry<Integer, Integer>>(statistics.get(key).entrySet());
 
-      Collections.sort(topicListByKey, new Comparator<Map.Entry<Integer, Integer>>() {
-        public int compare(Map.Entry<Integer, Integer> o1, Map.Entry<Integer, Integer> o2) {
-          return o2.getValue() - o1.getValue();
-        }
-      });
+      Collections.sort(topicListByKey, new ValueDescComparator<Integer>());
 
       writer.write(key);
       writer.write('\t');
       for (Map.Entry<Integer, Integer> entry : topicListByKey) {
         writer.write('(');
         writer.write(entry.getKey().toString());
+        writer.write(", ");
+        writer.write(entry.getValue().toString());
+        writer.write(") ");
+      }
+      writer.write('\n');
+    }
+
+    writer.close();
+  }
+
+  public static void runStatisticsByTopic(String... args) throws Exception {
+    if (args.length != 3) {
+      LOG.error("Calculation of Statistics needs path of topic list, path of song information," +
+          " and output path parameters");
+      return;
+    }
+
+    if (!FileUtils.validInputFile(args[0]) || !FileUtils.validInputFile(args[1]) || !FileUtils.validOutput(args[2])) {
+      return;
+    }
+
+
+    Map<Integer, Integer> topics = FileUtils.loadTopics(args[0]);
+    Iterable<Song> songs = FileUtils.loadSong(args[1]);
+
+    final StatisticsCalculator calculator = new StatisticsCalculator();
+    Map<String, Map<Integer, Integer>> artistStatistics = calculator.calculate(topics, songs, new ArtistsExtractor());
+    Map<String, Map<Integer, Integer>> lyricistStatistics = calculator.calculate(topics, songs, new LyricistsExtractor());
+    Map<String, Map<Integer, Integer>> dateStatistics = calculator.calculate(topics, songs, new DateExtractor());
+
+    BufferedWriter writer = new BufferedWriter(new FileWriter(args[2]));
+
+    Set<Integer> topicSet = new HashSet<Integer>(topics.values());
+    for (Integer topic : topicSet) {
+      // artists
+      List<Map.Entry<String, Integer>> artists = new ArrayList<Map.Entry<String, Integer>>();
+      for (Map.Entry<String, Map<Integer, Integer>> entry : artistStatistics.entrySet()) {
+        final Map<Integer, Integer> countMap = entry.getValue();
+        if (countMap.containsKey(topic)) {
+          artists.add(new AbstractMap.SimpleImmutableEntry<String, Integer>(entry.getKey(), countMap.get(topic)));
+        }
+      }
+      Collections.sort(artists, new ValueDescComparator<String>());
+
+      // lyricists
+      List<Map.Entry<String, Integer>> lyricists = new ArrayList<Map.Entry<String, Integer>>();
+      for (Map.Entry<String, Map<Integer, Integer>> entry : lyricistStatistics.entrySet()) {
+        final Map<Integer, Integer> countMap = entry.getValue();
+        if (countMap.containsKey(topic)) {
+          lyricists.add(new AbstractMap.SimpleImmutableEntry<String, Integer>(entry.getKey(), countMap.get(topic)));
+        }
+      }
+      Collections.sort(lyricists, new ValueDescComparator<String>());
+
+      // date
+      List<Map.Entry<String, Integer>> dates = new ArrayList<Map.Entry<String, Integer>>();
+      for (Map.Entry<String, Map<Integer, Integer>> entry : dateStatistics.entrySet()) {
+        final Map<Integer, Integer> countMap = entry.getValue();
+        if (countMap.containsKey(topic)) {
+          dates.add(new AbstractMap.SimpleImmutableEntry<String, Integer>(entry.getKey(), countMap.get(topic)));
+        }
+      }
+      Collections.sort(dates, new ValueDescComparator<String>());
+
+      writer.write("------------------------------------------------\n");
+      writer.write("Topic ");
+      writer.write(topic.toString());
+      writer.write('\n');
+      writer.write("Artists: ");
+      for (Map.Entry<String, Integer> entry : artists) {
+        writer.write('(');
+        writer.write(entry.getKey());
+        writer.write(", ");
+        writer.write(entry.getValue().toString());
+        writer.write(") ");
+      }
+      writer.write('\n');
+
+      writer.write("Lyricists: ");
+      for (Map.Entry<String, Integer> entry : lyricists) {
+        writer.write('(');
+        writer.write(entry.getKey());
+        writer.write(", ");
+        writer.write(entry.getValue().toString());
+        writer.write(") ");
+      }
+      writer.write('\n');
+
+      writer.write("Dates: ");
+      for (Map.Entry<String, Integer> entry : dates) {
+        writer.write('(');
+        writer.write(entry.getKey());
         writer.write(", ");
         writer.write(entry.getValue().toString());
         writer.write(") ");
