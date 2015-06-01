@@ -2,18 +2,19 @@ package kr.ac.yonsei.lis.project;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import kr.ac.yonsei.lis.project.analysis.StatisticsCalculator;
 import kr.ac.yonsei.lis.project.analysis.TopicModelingAnalysis;
 import kr.ac.yonsei.lis.project.melon.MelonInfoCrawler;
 import kr.ac.yonsei.lis.project.melon.MelonInfoExtractor;
-import kr.ac.yonsei.lis.project.model.Song;
+import kr.ac.yonsei.lis.project.model.*;
 import kr.ac.yonsei.lis.project.util.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.util.*;
 
 public class Runner {
   private static final Logger LOG = LoggerFactory.getLogger(Runner.class);
@@ -30,6 +31,8 @@ public class Runner {
       runExtractor(Arrays.copyOfRange(args, 1, args.length));
     } else if ("topicModeling".equals(args[0])) {
       runTopicModelingAnalysis(Arrays.copyOfRange(args, 1, args.length));
+    } else if ("statisticsByKey".equals(args[0])) {
+      runStatisticsByKey(Arrays.copyOfRange(args, 1, args.length));
     }
   }
 
@@ -114,5 +117,60 @@ public class Runner {
     Iterable<Song> songs = FileUtils.loadSong(args[0]);
 
     analysis.runAnalysis(songs, args[1], numTopics, numIterations, numThreads, numWords, date);
+  }
+
+  public static void runStatisticsByKey(String... args) throws Exception {
+    if (args.length != 4) {
+      LOG.error("Calculation of Statistics needs path of topic list, path of song information, key of statistics," +
+          " and output path parameters");
+      return;
+    }
+
+    if (!FileUtils.validInputFile(args[0]) || !FileUtils.validInputFile(args[1]) || !FileUtils.validOutput(args[3])) {
+      return;
+    }
+
+
+    KeyExtractor keyExtractor;
+
+    Map<Integer, Integer> topics = FileUtils.loadTopics(args[0]);
+    Iterable<Song> songs = FileUtils.loadSong(args[1]);
+
+    if ("artists".equals(args[2])) {
+      keyExtractor = new ArtistsExtractor();
+    } else if ("lyricists".equals(args[2])) {
+      keyExtractor = new LyricistsExtractor();
+    } else if ("date".equals(args[2])) {
+      keyExtractor = new DateExtractor();
+    } else {
+      return;
+    }
+
+    Map<String, Map<Integer, Integer>> statistics = new StatisticsCalculator().calculate(topics, songs, keyExtractor);
+
+    BufferedWriter writer = new BufferedWriter(new FileWriter(args[3]));
+    for (String key : statistics.keySet()) {
+      List<Map.Entry<Integer, Integer>> topicListByKey =
+          new ArrayList<Map.Entry<Integer, Integer>>(statistics.get(key).entrySet());
+
+      Collections.sort(topicListByKey, new Comparator<Map.Entry<Integer, Integer>>() {
+        public int compare(Map.Entry<Integer, Integer> o1, Map.Entry<Integer, Integer> o2) {
+          return o2.getValue() - o1.getValue();
+        }
+      });
+
+      writer.write(key);
+      writer.write('\t');
+      for (Map.Entry<Integer, Integer> entry : topicListByKey) {
+        writer.write('(');
+        writer.write(entry.getKey().toString());
+        writer.write(", ");
+        writer.write(entry.getValue().toString());
+        writer.write(") ");
+      }
+      writer.write('\n');
+    }
+
+    writer.close();
   }
 }

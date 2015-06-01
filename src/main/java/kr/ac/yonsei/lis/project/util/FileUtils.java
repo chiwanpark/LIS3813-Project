@@ -79,7 +79,14 @@ public class FileUtils {
 
     while (reader.ready()) {
       String line = reader.readLine();
+      if (line.startsWith("#")) {
+        continue;
+      }
+
       String[] split = line.split("\t");
+      if (split.length < 3) {
+        continue;
+      }
       int id = Integer.valueOf(split[1]);
       int topic = Integer.valueOf(split[2]);
 
