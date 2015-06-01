@@ -123,9 +123,9 @@ public class Runner {
   }
 
   public static void runTopicModelingAnalysis(String... args) throws Exception {
-    if (args.length != 6) {
+    if (args.length != 7) {
       LOG.error("Topic modeling needs input path, output path, number of topic, number of top words, number " +
-          "of iteration, and number of thread parameters");
+          "of iteration, number of thread, and date to analysis parameter");
       return;
     }
 
@@ -137,6 +137,7 @@ public class Runner {
     int numWords = Integer.valueOf(args[3]);
     int numIterations = Integer.valueOf(args[4]);
     int numThreads = Integer.valueOf(args[5]);
+    int date = Integer.valueOf(args[6]);
 
     List<Song> songs = new LinkedList<Song>();
     Gson gson = new GsonBuilder().create();
@@ -148,6 +149,6 @@ public class Runner {
       songs.add(song);
     }
 
-    analysis.runAnalysis(songs, args[1], numTopics, numIterations, numThreads, numWords);
+    analysis.runAnalysis(songs, args[1], numTopics, numIterations, numThreads, numWords, date);
   }
 }
