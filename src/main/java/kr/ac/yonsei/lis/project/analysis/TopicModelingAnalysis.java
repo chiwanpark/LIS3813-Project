@@ -79,7 +79,7 @@ public class TopicModelingAnalysis {
     }
 
     private boolean isCurrentValid() {
-      return ("".equals(date) || (!"".equals(date) && current.date.startsWith(date)));
+      return ("".equals(date) || (!"".equals(date) && current.date.startsWith(date))) && Integer.valueOf(current.date.substring(0, 4)) >= 1990;
     }
 
     private void moveToNext() {

@@ -13,7 +13,11 @@ public class StatisticsCalculator {
 
     for (Song song : songs) {
       Iterable<String> keys = extractor.extract(song);
-      int topic = topics.get(song.id);
+      Integer topic = topics.get(song.id);
+      if (topic == null) {
+        continue;
+      }
+
       for (String key : keys) {
         if ("".equals(key)) {
           continue;
